@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Watch — Central Florida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDE6D6;
+  --paper-deep:#E2D8C1;
+  --paper-edge:#D3C7AB;
+  --ink:#26231C;
+  --ink-soft:#6E6656;
+  --magenta:#B5177E;
+  --blue:#2C6BA8;
+  --amber:#B06F12;
+  --green:#2F6B45;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background-color:var(--paper);
+  background-image:
+    repeating-linear-gradient(63deg, rgba(110,102,86,.055) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-27deg, rgba(110,102,86,.04) 0 1px, transparent 1px 52px);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding:22px 18px 90px}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
+.mast h1{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:clamp(34px,9vw,54px);line-height:.92;margin:0;
+  text-transform:uppercase;letter-spacing:.055em;
+}
+.mast .sub{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-soft);margin-top:7px;
+  display:flex;flex-wrap:wrap;gap:6px 14px;
+}
+
+/* ---------- home selector ---------- */
+.homebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 20px}
+.homebar .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);margin-right:2px;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+.chip{
+  background:transparent;border:1px solid var(--paper-edge);border-radius:999px;
+  padding:5px 13px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+  letter-spacing:.06em;text-transform:uppercase;transition:.14s;
+}
+.chip:hover{border-color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip.mag[aria-pressed="true"]{background:var(--magenta);border-color:var(--magenta)}
+
+/* ---------- hero / next up ---------- */
+.next{
+  border:2px solid var(--magenta);border-radius:3px;background:rgba(255,255,255,.42);
+  padding:16px 16px 14px;margin-bottom:26px;position:relative;
+}
+.next::before{
+  content:"NEXT WINDOW";position:absolute;top:-9px;left:12px;background:var(--paper);
+  padding:0 7px;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.18em;color:var(--magenta);
+}
+.next .clock{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;
+  font-size:clamp(30px,10vw,46px);letter-spacing:-.01em;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.next .clock .u{font-size:.42em;letter-spacing:.1em;color:var(--ink-soft);margin:0 .5em 0 .08em}
+.next h2{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.04em;font-size:23px;margin:11px 0 3px;line-height:1.08;
+}
+.next .where{font-size:14px;color:var(--ink-soft)}
+.nextrow{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+
+/* ---------- compass ---------- */
+.dial{flex:0 0 auto;text-align:center}
+.dial svg{display:block}
+.dial .rd{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;
+  color:var(--ink-soft);margin-top:3px;white-space:nowrap;
+}
+
+/* ---------- filters ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
+.filternote{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-soft);
+  margin:0 0 20px;letter-spacing:.03em;
+}
+
+/* ---------- event list ---------- */
+.grp{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-soft);
+  border-bottom:1px solid var(--paper-edge);padding-bottom:5px;margin:26px 0 0;
+}
+.ev{
+  border-bottom:1px solid var(--paper-edge);padding:16px 0;
+  display:flex;gap:15px;align-items:flex-start;
+}
+.ev.mil{border-left:3px dashed var(--amber);padding-left:12px}
+.ev .body{flex:1;min-width:0}
+.ev .when{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.ev h3{
+  font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:21px;
+  text-transform:uppercase;letter-spacing:.035em;margin:3px 0 4px;line-height:1.1;
+}
+.ev .meta{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
+.ev .detail{font-size:14px;margin:6px 0 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
+.tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:2.5px 7px;border:1px solid currentColor;border-radius:2px;
+}
+.t-launch{color:var(--magenta)}
+.t-airshow{color:var(--blue)}
+.t-mil{color:var(--amber)}
+.t-vis{color:var(--green);border-style:dashed}
+.t-prelim{color:var(--ink-soft)}
+.t-hold{color:#9A2B1E}
+/* flight category — aviation convention: VFR green, MVFR blue, IFR red, LIFR magenta */
+.wx{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-top:9px;
+  padding:7px 9px;border-left:2px solid var(--paper-edge);background:rgba(255,255,255,.36);
+  font-size:13px;
+}
+.cat{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;font-weight:600;
+  padding:2.5px 7px;border-radius:2px;color:#fff;
+}
+.cat-VFR{background:#2F6B45}
+.cat-MVFR{background:#2C6BA8}
+.cat-IFR{background:#9A2B1E}
+.cat-LIFR{background:#B5177E}
+.cat-NA{background:var(--ink-soft)}
+.wx .read{color:var(--ink-soft);flex:1;min-width:140px}
+.wx .stn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.06em}
+.divider{width:1px;align-self:stretch;background:var(--paper-edge);margin:0 4px}
+.ics{
+  background:none;border:1px solid var(--paper-edge);border-radius:2px;
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 8px;transition:.14s;
+}
+.ics:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+a{color:var(--blue)}
+
+.status{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft);
+  padding:16px 0;
+}
+.status.err{color:#9A2B1E}
+footer{
+  margin-top:40px;border-top:2px solid var(--ink);padding-top:12px;
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;line-height:1.75;
+  color:var(--ink-soft);letter-spacing:.03em;
+}
+@media (max-width:520px){
+  .nextrow{flex-direction:column-reverse;align-items:flex-start;gap:10px}
+  .ev{gap:11px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ev{animation:rise .4s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+:focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <h1>Sky Watch</h1>
+    <div class="sub">
+      <span>Central Florida</span>
+      <span id="stamp">loading…</span>
+    </div>
+  </header>
+
+  <div class="homebar">
+    <span class="lbl">Watching from</span>
+    <button class="chip" data-home="gnv" aria-pressed="true">Gainesville</button>
+    <button class="chip" data-home="orl" aria-pressed="false">Orlando</button>
+  </div>
+
+  <div id="next"></div>
+
+  <div class="filters" id="filters">
+    <button class="chip" data-f="launch" aria-pressed="true">Launches</button>
+    <button class="chip" data-f="airshow" aria-pressed="true">Airshows</button>
+    <button class="chip" data-f="military" aria-pressed="true">Military</button>
+    <button class="chip mag" data-f="visible" aria-pressed="false">Visible from home</button>
+    <button class="chip mag" data-f="drive" aria-pressed="false">≤ 2h drive</button>
+    <span class="divider"></span>
+    <button class="chip" data-wx aria-pressed="false">Sky conditions</button>
+  </div>
+  <p class="filternote" id="filternote"></p>
+
+  <div id="list"></div>
+
+  <footer>
+    Launch data: The Space Devs Launch Library 2, refreshed on load.<br>
+    Airshow and military entries: hand-maintained in <code>events.json</code>.<br>
+    Visibility and drive times are estimates, not promises. Scrubs happen. Check before you drive.
+  </footer>
+</div>
+
+<script type="application/json" id="fallback-events">
+{"events":[
+{"id":"nasjax-2026","type":"airshow","name":"NAS Jacksonville Air Show","detail":"Blue Angels. Thunderbirds are also listed for this date on the USAF schedule — rare double-team billing, but the two calendars disagree, so treat the Thunderbirds half as unconfirmed.","venue":"NAS Jacksonville","lat":30.2358,"lon":-81.6806,"start":"2026-10-17","end":"2026-10-18","confidence":"confirmed","cost":"Free — on-base show"},
+{"id":"homecoming-2026","type":"airshow","name":"Blue Angels Homecoming Air Show","detail":"Season finale at the squadron's home field. First homecoming since 2024 — the 2025 edition was cancelled during the government shutdown.","venue":"NAS Pensacola","lat":30.3536,"lon":-87.3125,"start":"2026-11-06","end":"2026-11-07","confidence":"confirmed","cost":"Free — on-base show"},
+{"id":"snf-2027","type":"airshow","name":"Sun 'n Fun Aerospace Expo","detail":"Second-largest aviation expo in the US and the traditional opener of the airshow season. Blue Angels expected Apr 10–11 on the team's preliminary schedule; the teams rotate here year to year. Night airshows midweek.","venue":"Lakeland Linder International Airport","lat":27.9887,"lon":-82.0186,"start":"2027-04-06","end":"2027-04-11","confidence":"preliminary","cost":"Ticketed"},
+{"id":"ocala-2027","type":"airshow","name":"Wings Over Ocala","detail":"Blue Angels on the preliminary 2027 schedule. Closest they get to Gainesville — roughly a 40-minute drive.","venue":"Ocala International Airport","lat":29.1717,"lon":-82.2242,"start":"2027-05-01","end":"2027-05-02","confidence":"preliminary","cost":"Ticketed"},
+{"id":"ftl-2027","type":"airshow","name":"Air Dot Show Fort Lauderdale","detail":"Blue Angels over the beach. Preliminary 2027 date.","venue":"Fort Lauderdale Beach","lat":26.1224,"lon":-80.1373,"start":"2027-05-15","end":"2027-05-16","confidence":"preliminary","cost":"Ticketed"},
+{"id":"pcolabeach-2027","type":"airshow","name":"Pensacola Beach Air Show","detail":"Over-water show. Thursday practice and Friday dress rehearsal are usually as good as Saturday and far less crowded.","venue":"Pensacola Beach","lat":30.3313,"lon":-87.1416,"start":"2027-07-17","end":"2027-07-17","confidence":"preliminary","cost":"Free"},
+{"id":"seaandsky-2027","type":"airshow","name":"Jacksonville Beach Sea & Sky Airshow","detail":"Blue Angels on the preliminary 2027 schedule. Beach show, free viewing.","venue":"Jacksonville Beach","lat":30.2947,"lon":-81.3931,"start":"2027-10-23","end":"2027-10-24","confidence":"preliminary","cost":"Free"},
+{"id":"homecoming-2027","type":"airshow","name":"Blue Angels Homecoming Air Show","detail":"Preliminary 2027 season finale.","venue":"NAS Pensacola","lat":30.3536,"lon":-87.3125,"start":"2027-11-05","end":"2027-11-06","confidence":"preliminary","cost":"Free — on-base show"}
+]}
+</script>
+
+<script>
+"use strict";
+
+const HOMES = {
+  gnv: { name:"Gainesville", lat:29.6516, lon:-82.3248 },
+  orl: { name:"Orlando",     lat:28.5384, lon:-81.3789 }
+};
+
+const state = {
+  home: "gnv",
+  filters: { launch:true, airshow:true, military:true, visible:false, drive:false },
+  events: [],
+  error: null,
+  wxOn: false,        // sky-conditions layer toggle
+  wx: null,           // station id -> parsed observation
+  wxError: null,
+  wxLoading: false
+};
+
+/* ---------- geometry ---------- */
+const R_MI = 3958.8;
+const rad = d => d * Math.PI / 180;
+
+function distanceMi(a, b) {
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
+  return 2 * R_MI * Math.asin(Math.sqrt(h));
+}
+
+function bearingDeg(a, b) {
+  const dLon = rad(b.lon - a.lon);
+  const y = Math.sin(dLon) * Math.cos(rad(b.lat));
+  const x = Math.cos(rad(a.lat))*Math.sin(rad(b.lat)) - Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(dLon);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const cardinal = deg => COMPASS[Math.round(deg / 22.5) % 16];
+
+// Rough highway estimate: 55 mph average plus a fixed 15 min of local driving.
+const driveHours = mi => mi / 55 + 0.25;
+
+function driveLabel(mi) {
+  const h = driveHours(mi);
+  if (h < 1) return Math.round(h * 60) + " min";
+  const whole = Math.floor(h), mins = Math.round((h - whole) * 60);
+  return whole + "h" + (mins ? " " + mins + "m" : "");
+}
+
+/* ---------- visibility heuristic ---------- */
+// A rocket clears the horizon fast and climbs high. From ~200 mi away a night
+// launch is a slow bright star in the eastern sky; in daylight it's nothing.
+// Airshows have to be attended, so they are never "visible from home".
+function visibleFromHome(ev, home) {
+  if (ev.type !== "launch" || !ev.date) return false;
+  const mi = distanceMi(home, ev);
+  if (mi > 220) return false;
+  const hour = Number(new Intl.DateTimeFormat("en-US", {
+    timeZone:"America/New_York", hour:"numeric", hour12:false
+  }).format(ev.date));
+  return hour >= 20 || hour <= 6;
+}
+
+/* ---------- sky conditions layer (METAR) ---------- *
+ * Reporting stations near every venue on the board. One request covers all of
+ * them; each event borrows the nearest one.                                   */
+const STATIONS = [
+  { id:"KXMR", name:"Cape Canaveral SFS",  lat:28.4675, lon:-80.5665 },
+  { id:"KTIX", name:"Titusville",          lat:28.5148, lon:-80.7992 },
+  { id:"KMCO", name:"Orlando Intl",        lat:28.4294, lon:-81.3089 },
+  { id:"KGNV", name:"Gainesville",         lat:29.6900, lon:-82.2718 },
+  { id:"KOCF", name:"Ocala",               lat:29.1726, lon:-82.2241 },
+  { id:"KLAL", name:"Lakeland Linder",     lat:27.9889, lon:-82.0186 },
+  { id:"KVRB", name:"Vero Beach",          lat:27.6556, lon:-80.4179 },
+  { id:"KJAX", name:"Jacksonville Intl",   lat:30.4941, lon:-81.6879 },
+  { id:"KPNS", name:"Pensacola",           lat:30.4734, lon:-87.1866 },
+  { id:"KFLL", name:"Fort Lauderdale",     lat:26.0726, lon:-80.1527 }
+];
+
+const nearestStation = pt =>
+  STATIONS.reduce((best, s) =>
+    distanceMi(pt, s) < distanceMi(pt, best) ? s : best, STATIONS[0]);
+
+// Ceiling is the lowest broken or overcast layer. Scattered and few don't count
+// for pilots — but they very much count for watching a rocket, so we keep both.
+function readClouds(clouds) {
+  const layers = (clouds || [])
+    .filter(c => c.cover && c.cover !== "CLR" && c.cover !== "SKC" && c.base != null)
+    .sort((a, b) => a.base - b.base);
+  const ceilingLayer = layers.find(c => ["BKN","OVC","OVX"].includes(c.cover));
+  return { layers, ceiling: ceilingLayer ? ceilingLayer.base : null, lowest: layers[0] || null };
+}
+
+function flightCategory(ceiling, visib) {
+  const c = ceiling == null ? Infinity : ceiling;
+  const v = visib == null ? Infinity : visib;
+  if (c < 500  || v < 1) return "LIFR";
+  if (c < 1000 || v < 3) return "IFR";
+  if (c <= 3000 || v <= 5) return "MVFR";
+  return "VFR";
+}
+
+// What the sky means for someone on the ground looking up — a different question
+// than what it means for someone trying to land.
+function skyRead(obs) {
+  const { lowest, ceiling } = obs;
+  if (!lowest) return "Clear. Nothing between you and the ascent.";
+  const ft = lowest.base.toLocaleString();
+  if (lowest.cover === "FEW") return `A few clouds at ${ft} ft. Effectively open sky.`;
+  if (lowest.cover === "SCT") return `Scattered deck at ${ft} ft. Gaps to see through, no guarantees.`;
+  if (ceiling != null && ceiling < 8000) return `${lowest.cover === "OVC" ? "Overcast" : "Broken"} at ${ft} ft. Low enough to swallow the climb.`;
+  return `${lowest.cover === "OVC" ? "Overcast" : "Broken"} at ${ft} ft. High deck — a bright ascent may still punch through.`;
+}
+
+function parseVisibility(v) {
+  if (v == null) return null;
+  if (typeof v === "number") return v;
+  const n = parseFloat(String(v).replace("+", ""));
+  return isNaN(n) ? null : n;
+}
+
+const AWC = "https://aviationweather.gov/api/data/metar";
+
+async function loadWeather() {
+  const ids = STATIONS.map(s => s.id).join(",");
+  const r = await fetch(`${AWC}?ids=${ids}&format=json`);
+  if (!r.ok) throw new Error("Aviation Weather Center returned " + r.status + ".");
+  const rows = await r.json();
+
+  const byStation = {};
+  (Array.isArray(rows) ? rows : []).forEach(row => {
+    const id = row.icaoId;
+    if (!id || byStation[id]) return;   // keep only the most recent per station
+    const clouds = readClouds(row.clouds);
+    const visib = parseVisibility(row.visib);
+    byStation[id] = {
+      id,
+      ...clouds,
+      visib,
+      category: flightCategory(clouds.ceiling, visib),
+      observed: row.obsTime ? new Date(row.obsTime * 1000) : null,
+      raw: row.rawOb || ""
+    };
+  });
+  if (!Object.keys(byStation).length) throw new Error("No observations came back.");
+  return byStation;
+}
+
+function wxBlock(ev) {
+  if (!state.wxOn) return "";
+  if (state.wxLoading) return `<div class="wx"><span class="cat cat-NA">···</span><span class="read">Reading the sky…</span></div>`;
+  if (state.wxError) return "";
+  const stn = nearestStation(ev);
+  const obs = state.wx && state.wx[stn.id];
+  if (!obs) return `<div class="wx"><span class="cat cat-NA">NO OBS</span><span class="read">${esc(stn.id)} isn't reporting.</span></div>`;
+
+  const hoursOut = (ev.date - Date.now()) / 36e5;
+  const caveat = hoursOut > 12
+    ? " — current conditions, not a forecast"
+    : "";
+  return `<div class="wx">
+    <span class="cat cat-${obs.category}">${obs.category}</span>
+    <span class="read">${esc(skyRead(obs))}</span>
+    <span class="stn">${esc(stn.id)}${esc(caveat)}</span>
+  </div>`;
+}
+
+/* ---------- formatting ---------- */
+const fmtDateTime = d => new Intl.DateTimeFormat("en-US", {
+  timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric",
+  hour:"numeric", minute:"2-digit", hour12:true
+}).format(d);
+
+const fmtDate = d => new Intl.DateTimeFormat("en-US", {
+  timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric", year:"numeric"
+}).format(d);
+
+function dateRangeLabel(ev) {
+  if (ev.precise) return fmtDateTime(ev.date) + " ET";
+  if (ev.endDate && ev.endDate.getTime() !== ev.date.getTime()) {
+    return fmtDate(ev.date) + " – " + fmtDate(ev.endDate);
+  }
+  return fmtDate(ev.date);
+}
+
+function countdown(target) {
+  let s = Math.max(0, Math.floor((target - Date.now()) / 1000));
+  const d = Math.floor(s / 86400); s -= d * 86400;
+  const h = Math.floor(s / 3600);  s -= h * 3600;
+  const m = Math.floor(s / 60);    s -= m * 60;
+  return { d, h, m, s };
+}
+
+const esc = str => String(str).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c]));
+
+/* ---------- compass dial ---------- */
+function dialSVG(deg) {
+  return `<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+    <circle cx="26" cy="26" r="23" fill="none" stroke="#D3C7AB" stroke-width="1"/>
+    <circle cx="26" cy="26" r="17" fill="none" stroke="#D3C7AB" stroke-width=".5" stroke-dasharray="1 3"/>
+    <text x="26" y="9" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#6E6656">N</text>
+    <g transform="rotate(${deg.toFixed(1)} 26 26)">
+      <path d="M26 8 L29.5 28 L26 25 L22.5 28 Z" fill="#B5177E"/>
+    </g>
+    <circle cx="26" cy="26" r="1.6" fill="#26231C"/>
+  </svg>`;
+}
+
+/* ---------- calendar file ---------- */
+function icsStamp(d, allDay) {
+  const p = n => String(n).padStart(2, "0");
+  return allDay
+    ? d.getUTCFullYear() + p(d.getUTCMonth()+1) + p(d.getUTCDate())
+    : d.getUTCFullYear() + p(d.getUTCMonth()+1) + p(d.getUTCDate()) + "T" +
+      p(d.getUTCHours()) + p(d.getUTCMinutes()) + "00Z";
+}
+
+function downloadICS(ev) {
+  const allDay = !ev.precise;
+  const end = new Date((ev.endDate || ev.date).getTime() + (allDay ? 864e5 : 36e5));
+  const lines = [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Sky Watch//EN","BEGIN:VEVENT",
+    "UID:" + ev.id + "@skywatch",
+    "DTSTAMP:" + icsStamp(new Date(), false),
+    allDay ? "DTSTART;VALUE=DATE:" + icsStamp(ev.date, true) : "DTSTART:" + icsStamp(ev.date, false),
+    allDay ? "DTEND;VALUE=DATE:"   + icsStamp(end, true)     : "DTEND:"   + icsStamp(end, false),
+    "SUMMARY:" + ev.name.replace(/[,;]/g, ""),
+    "LOCATION:" + String(ev.venue || "").replace(/[,;]/g, ""),
+    "DESCRIPTION:" + String(ev.detail || "").replace(/[,;\n]/g, " ").slice(0, 300),
+    "BEGIN:VALARM","TRIGGER:-PT3H","ACTION:DISPLAY","DESCRIPTION:Sky Watch reminder","END:VALARM",
+    "END:VEVENT","END:VCALENDAR"
+  ];
+  const blob = new Blob([lines.join("\r\n")], { type:"text/calendar" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = ev.id + ".ics";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- data loading ---------- */
+async function loadCurated() {
+  let raw;
+  try {
+    const r = await fetch("events.json", { cache:"no-store" });
+    if (!r.ok) throw new Error("no file");
+    raw = await r.json();
+  } catch {
+    raw = JSON.parse(document.getElementById("fallback-events").textContent);
+  }
+  return (raw.events || []).map(e => ({
+    id: e.id,
+    type: e.type || "airshow",
+    name: e.name,
+    venue: e.venue,
+    detail: e.detail,
+    cost: e.cost,
+    url: e.url,
+    lat: e.lat, lon: e.lon,
+    date: new Date(e.start + "T12:00:00-04:00"),
+    endDate: new Date((e.end || e.start) + "T12:00:00-04:00"),
+    precise: false,
+    confidence: e.confidence || "confirmed"
+  }));
+}
+
+const FL_PAD = /florida|, fl|cape canaveral|kennedy/i;
+
+async function loadLaunches() {
+  const url = "https://ll.thespacedevs.com/2.3.0/launches/upcoming/?limit=60";
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(r.status === 429
+    ? "Launch feed is rate-limited right now (15 requests an hour from one address). Try again shortly."
+    : "Launch feed returned " + r.status + ".");
+  const data = await r.json();
+  return (data.results || [])
+    .filter(l => FL_PAD.test((l.pad && l.pad.location && (l.pad.location.name || l.pad.location.country || "")) || ""))
+    .map(l => {
+      const pad = l.pad || {};
+      const status = (l.status && (l.status.abbrev || l.status.name)) || "";
+      return {
+        id: "ll-" + l.id,
+        type: "launch",
+        name: l.name || "Unnamed launch",
+        venue: (pad.name || "Pad") + ", " + ((pad.location && pad.location.name) || "Florida"),
+        detail: (l.mission && l.mission.description) ? l.mission.description.slice(0, 240) : "",
+        provider: (l.launch_service_provider && l.launch_service_provider.name) || "",
+        lat: parseFloat(pad.latitude), lon: parseFloat(pad.longitude),
+        date: new Date(l.net),
+        endDate: null,
+        precise: !(l.status && /tbd/i.test(status)),
+        status,
+        url: l.url
+      };
+    })
+    .filter(e => !isNaN(e.lat) && !isNaN(e.date.getTime()));
+}
+
+/* ---------- rendering ---------- */
+function passesFilters(ev, home) {
+  const f = state.filters;
+  if (!f[ev.type]) return false;
+  if (f.visible && !visibleFromHome(ev, home)) return false;
+  if (f.drive && driveHours(distanceMi(home, ev)) > 2) return false;
+  return true;
+}
+
+function render() {
+  const home = HOMES[state.home];
+  const now = Date.now();
+
+  const visible = state.events
+    .filter(e => (e.endDate || e.date).getTime() > now - 36e5)
+    .filter(e => passesFilters(e, home))
+    .sort((a, b) => a.date - b.date);
+
+  renderNext(visible[0], home);
+  renderList(visible, home);
+
+  const drive = state.events.filter(e => e.type === "airshow" && driveHours(distanceMi(home, e)) <= 2).length;
+  const note = document.getElementById("filternote");
+  if (state.wxOn && state.wxError) {
+    note.innerHTML = `Sky layer off — ${esc(state.wxError)} See the README for the fallback.`;
+    note.style.color = "#9A2B1E";
+  } else {
+    note.textContent = visible.length + " upcoming · " + drive + " airshows within 2h of " + home.name;
+    note.style.color = "";
+  }
+}
+
+function renderNext(ev, home) {
+  const el = document.getElementById("next");
+  if (!ev) { el.innerHTML = ""; return; }
+  const brg = bearingDeg(home, ev);
+  const mi = distanceMi(home, ev);
+  const c = countdown(ev.date);
+  const clock = c.d > 0
+    ? `${c.d}<span class="u">d</span>${c.h}<span class="u">h</span>${c.m}<span class="u">m</span>`
+    : `${String(c.h).padStart(2,"0")}<span class="u">h</span>${String(c.m).padStart(2,"0")}<span class="u">m</span>${String(c.s).padStart(2,"0")}<span class="u">s</span>`;
+
+  el.innerHTML = `<div class="next">
+    <div class="nextrow">
+      <div style="min-width:0">
+        <div class="clock" id="clock">${clock}</div>
+        <h2>${esc(ev.name)}</h2>
+        <div class="where">${esc(dateRangeLabel(ev))} · ${esc(ev.venue || "")}</div>
+        <div class="where" style="margin-top:4px">${Math.round(mi)} mi ${cardinal(brg)} · about ${driveLabel(mi)} from ${esc(home.name)}${visibleFromHome(ev, home) ? " · likely visible from home" : ""}</div>
+      </div>
+      <div class="dial">${dialSVG(brg)}<div class="rd">${cardinal(brg)} ${Math.round(brg)}°</div></div>
+    </div>
+    ${wxBlock(ev)}
+  </div>`;
+  el.dataset.target = ev.date.getTime();
+}
+
+function renderList(events, home) {
+  const list = document.getElementById("list");
+  if (state.error && !events.length) {
+    list.innerHTML = `<p class="status err">${esc(state.error)}</p>`;
+    return;
+  }
+  if (!events.length) {
+    list.innerHTML = `<p class="status">Nothing matches those filters. Loosen one — the drive filter is usually the culprit.</p>`;
+    return;
+  }
+
+  let html = "", lastMonth = "";
+  events.forEach(ev => {
+    const month = new Intl.DateTimeFormat("en-US", { timeZone:"America/New_York", month:"long", year:"numeric" }).format(ev.date);
+    if (month !== lastMonth) { html += `<p class="grp">${month}</p>`; lastMonth = month; }
+
+    const brg = bearingDeg(home, ev), mi = distanceMi(home, ev);
+    const vis = visibleFromHome(ev, home);
+    const tags = [];
+    tags.push(`<span class="tag t-${ev.type === "military" ? "mil" : ev.type}">${ev.type}</span>`);
+    if (vis) tags.push(`<span class="tag t-vis">visible from ${esc(home.name)}</span>`);
+    if (ev.confidence === "preliminary") tags.push(`<span class="tag t-prelim">date preliminary</span>`);
+    if (ev.status && /hold|fail|tbd/i.test(ev.status)) tags.push(`<span class="tag t-hold">${esc(ev.status)}</span>`);
+    if (ev.cost) tags.push(`<span class="tag t-prelim">${esc(ev.cost)}</span>`);
+
+    html += `<article class="ev${ev.type === "military" ? " mil" : ""}">
+      <div class="dial">${dialSVG(brg)}<div class="rd">${cardinal(brg)} ${Math.round(mi)}mi</div></div>
+      <div class="body">
+        <div class="when">${esc(dateRangeLabel(ev))}</div>
+        <h3>${esc(ev.name)}</h3>
+        <div class="meta">${esc(ev.venue || "")}${ev.provider ? " · " + esc(ev.provider) : ""} · ${driveLabel(mi)} drive</div>
+        ${ev.detail ? `<p class="detail">${esc(ev.detail)}</p>` : ""}
+        ${wxBlock(ev)}
+        <div class="tags">${tags.join("")}
+          <button class="ics" data-ics="${esc(ev.id)}">Add to calendar</button>
+          ${ev.url && /^https/.test(ev.url) ? `<a class="tag t-prelim" style="text-decoration:none" href="${esc(ev.url)}" target="_blank" rel="noopener">Source</a>` : ""}
+        </div>
+      </div>
+    </article>`;
+  });
+  list.innerHTML = html;
+
+  list.querySelectorAll("[data-ics]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ev = state.events.find(e => e.id === btn.dataset.ics);
+      if (ev) downloadICS(ev);
+    });
+  });
+}
+
+/* ---------- ticking ---------- */
+setInterval(() => {
+  const el = document.getElementById("next");
+  const target = Number(el.dataset.target);
+  const clockEl = document.getElementById("clock");
+  if (!target || !clockEl) return;
+  const c = countdown(target);
+  clockEl.innerHTML = c.d > 0
+    ? `${c.d}<span class="u">d</span>${c.h}<span class="u">h</span>${c.m}<span class="u">m</span>`
+    : `${String(c.h).padStart(2,"0")}<span class="u">h</span>${String(c.m).padStart(2,"0")}<span class="u">m</span>${String(c.s).padStart(2,"0")}<span class="u">s</span>`;
+}, 1000);
+
+/* ---------- wiring ---------- */
+document.querySelectorAll("[data-home]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.home = btn.dataset.home;
+    document.querySelectorAll("[data-home]").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.home === state.home)));
+    render();
+  });
+});
+
+document.querySelectorAll("[data-f]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const k = btn.dataset.f;
+    state.filters[k] = !state.filters[k];
+    btn.setAttribute("aria-pressed", String(state.filters[k]));
+    render();
+  });
+});
+
+document.querySelector("[data-wx]").addEventListener("click", async (e) => {
+  const btn = e.currentTarget;
+  state.wxOn = !state.wxOn;
+  btn.setAttribute("aria-pressed", String(state.wxOn));
+
+  // Fetch once, on first switch-on. Nothing loads until you ask for it.
+  if (state.wxOn && !state.wx && !state.wxError) {
+    state.wxLoading = true;
+    render();
+    try {
+      state.wx = await loadWeather();
+      state.wxError = null;
+    } catch (err) {
+      state.wxError = /Failed to fetch|NetworkError|CORS/i.test(err.message)
+        ? "the Aviation Weather Center refused the browser's cross-origin request."
+        : err.message;
+    }
+    state.wxLoading = false;
+  }
+  render();
+});
+
+(async function init() {
+  const stamp = document.getElementById("stamp");
+  const curated = await loadCurated();
+  state.events = curated;
+  render();
+
+  try {
+    const launches = await loadLaunches();
+    state.events = curated.concat(launches);
+    stamp.textContent = "Updated " + new Intl.DateTimeFormat("en-US", {
+      timeZone:"America/New_York", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"
+    }).format(new Date()) + " ET";
+  } catch (err) {
+    state.error = err.message;
+    stamp.textContent = "Airshows only — launch feed unavailable";
+  }
+  render();
+})();
+</script>
+</body>
+</html>
