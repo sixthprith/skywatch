@@ -81,13 +81,24 @@ The side panel is a filter bank: category lamps that light rather than fill, a d
 
 ## The sky conditions layer
 
-Off by default. Hit **Sky conditions** and the page makes one request to the Aviation Weather Center for current METARs at ten reporting stations, then annotates each event with the nearest one. Nothing loads until you switch it on, and it only loads once per session.
+Off by default. Hit **Sky conditions** and the page queries the National Weather Service for current observations at eleven reporting stations across Florida, then annotates each event with the nearest one. Nothing loads until you switch it on, and it loads once per session.
 
-Each event gets a flight category — VFR, MVFR, IFR, LIFR — in the standard aviation colors, plus a plain-language read of what the cloud layers mean *for watching*, which is a different question than what they mean for landing. A scattered deck at 3,000 feet is comfortably VFR and will still hide a rocket.
+NWS serves one station per request, so the page fires all eleven in parallel through `Promise.allSettled` — they land in roughly 150 ms. A station that fails to report is simply absent rather than breaking the layer.
 
-**If the layer refuses to load:** the AWC may not send the `Access-Control-Allow-Origin` header, which means a browser on your domain isn't allowed to read the response. Enough people have built proxies for this API that I'd assume it doesn't, but it's untested here — flip the switch and find out. The page says so plainly if it fails.
+Each event gets a flight category — VFR, MVFR, IFR, LIFR — in the standard aviation colours, plus a plain-language read of what the cloud layers mean *for watching*, which is a different question from what they mean for landing. A scattered deck at 3,000 ft is comfortably VFR and will still hide a rocket.
 
-The fallback, if it does: add a step to `.github/workflows/feed.yml` that curls the METAR endpoint and writes `wx.json` into the repo, then point `loadWeather()` at that file instead. Server-to-server requests have no CORS restriction, so it just works. The cost is staleness — a six-hour cron gives you six-hour-old weather, which is close to useless. Better to run that job every 20 minutes, or drop the layer to `api.weather.gov`, which does send CORS headers and will work directly from the browser today.
+Two things the layer adds beyond the category:
+
+- **Fog risk.** When the temperature and dew point are within 2.5 °C, the read says so. A tight spread is what actually ruins a pre-dawn launch viewing, and it is invisible in a flight category.
+- **Observation age.** Each read names its station and how old the reading is. Florida observations commonly run 45–90 minutes behind, and a 3-hour-old "clear" is a materially weaker claim than a 10-minute-old one.
+
+### Why NWS and not the Aviation Weather Center
+
+The AWC's METAR endpoint was the original choice and had to be abandoned: it does not send an `Access-Control-Allow-Origin` header, so a browser on your domain is not permitted to read the response. This was confirmed against the live site, not assumed — the call fails with `TypeError: Failed to fetch`.
+
+`api.weather.gov` does send the header, needs no key, and works directly from the browser. The trade-offs are that it serves one station per request rather than a batch, and it reports heights and distances in metres, so the page converts to feet and statute miles before computing the category.
+
+If you ever want AWC data specifically — it carries the raw METAR text and a few fields NWS omits — the route is server-side: add a step to `.github/workflows/feed.yml` that curls the endpoint and commits a `wx.json`, then point `loadWx()` at that file. Server-to-server requests have no CORS restriction. The cost is staleness, so that job would want to run every 20 minutes rather than every 6 hours.
 
 ## Two things the site guesses
 

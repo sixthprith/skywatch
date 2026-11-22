@@ -375,33 +375,50 @@ function flightCat(ceil,vis){
   const c=ceil==null?Infinity:ceil,v=vis==null?Infinity:vis;
   if(c<500||v<1)return'LIFR'; if(c<1000||v<3)return'IFR';
   if(c<=3000||v<=5)return'MVFR'; return'VFR';}
+// The National Weather Service serves one station per request but does send
+// CORS headers, so the browser may call it directly. Eleven run in parallel and
+// land in well under a second; a station that misses is simply absent.
+const NWS='https://api.weather.gov/stations/';
 async function loadWx(){
-  const r=await fetch('https://aviationweather.gov/api/data/metar?ids='+STATIONS.map(s=>s.id).join(',')+'&format=json');
-  if(!r.ok)throw new Error('Aviation Weather Center returned '+r.status+'.');
-  const rows=await r.json(),out={};
-  (Array.isArray(rows)?rows:[]).forEach(row=>{
-    if(!row.icaoId||out[row.icaoId])return;
-    const layers=(row.clouds||[]).filter(c=>c.cover&&!['CLR','SKC'].includes(c.cover)&&c.base!=null)
+  const res=await Promise.allSettled(STATIONS.map(st=>
+    fetch(NWS+st.id+'/observations/latest')
+      .then(r=>r.ok?r.json():Promise.reject(new Error(st.id+' returned '+r.status)))));
+  const FT=3.28084,SM=1609.34,out={};
+  res.forEach((r,i)=>{
+    if(r.status!=='fulfilled')return;
+    const p=(r.value&&r.value.properties)||{};
+    // NWS reports heights in metres, and sometimes hands CLR a nominal base.
+    const layers=(p.cloudLayers||[])
+      .filter(c=>c.amount&&!['CLR','SKC'].includes(c.amount)&&c.base&&c.base.value!=null)
+      .map(c=>({cover:c.amount,base:Math.round(c.base.value*FT)}))
       .sort((a,b)=>a.base-b.base);
     const ceilL=layers.find(c=>['BKN','OVC','OVX'].includes(c.cover));
     const ceil=ceilL?ceilL.base:null;
-    const v=row.visib==null?null:parseFloat(String(row.visib).replace('+',''));
-    out[row.icaoId]={id:row.icaoId,lowest:layers[0]||null,ceiling:ceil,
-      category:flightCat(ceil,isNaN(v)?null:v)};});
-  if(!Object.keys(out).length)throw new Error('No observations came back.');
+    const vis=(p.visibility&&p.visibility.value!=null)?p.visibility.value/SM:null;
+    const t=p.temperature&&p.temperature.value,d=p.dewpoint&&p.dewpoint.value;
+    out[STATIONS[i].id]={id:STATIONS[i].id,lowest:layers[0]||null,ceiling:ceil,
+      category:flightCat(ceil,vis),
+      ageMin:p.timestamp?Math.round((Date.now()-new Date(p.timestamp))/6e4):null,
+      // A tight temperature/dew-point spread is what fogs in a pre-dawn launch.
+      fog:(typeof t==='number'&&typeof d==='number'&&(t-d)<=2.5)};});
+  if(!Object.keys(out).length)throw new Error('No observations came back from the National Weather Service.');
   return out;}
 const wxFor=e=>WX?WX[nearestStn(e.ll).id]||null:null;
 // Flight category is calibrated for landing an aeroplane, not for watching an
 // ascent: a scattered deck at 3,000 ft is comfortably VFR and still hides a rocket.
 function skyRead(o){
   if(!o)return'No observation from the nearest station.';
-  const L=o.lowest;
-  if(!L)return'Clear. Nothing between you and the ascent.';
-  const ft=L.base.toLocaleString();
-  if(L.cover==='FEW')return'A few clouds at '+ft+' ft. Effectively open sky.';
-  if(L.cover==='SCT')return'Scattered deck at '+ft+' ft. Gaps to see through, no promises.';
-  if(o.ceiling!=null&&o.ceiling<8000)return(L.cover==='OVC'?'Overcast':'Broken')+' at '+ft+' ft. Low enough to swallow the climb.';
-  return(L.cover==='OVC'?'Overcast':'Broken')+' at '+ft+' ft. High deck \u2014 a bright ascent may still punch through.';}
+  const L=o.lowest;let s;
+  if(!L)s='Clear. Nothing between you and the ascent.';
+  else{
+    const ft=L.base.toLocaleString();
+    if(L.cover==='FEW')s='A few clouds at '+ft+' ft. Effectively open sky.';
+    else if(L.cover==='SCT')s='Scattered deck at '+ft+' ft. Gaps to see through, no promises.';
+    else if(o.ceiling!=null&&o.ceiling<8000)s=(L.cover==='OVC'?'Overcast':'Broken')+' at '+ft+' ft. Low enough to swallow the climb.';
+    else s=(L.cover==='OVC'?'Overcast':'Broken')+' at '+ft+' ft. High deck \u2014 a bright ascent may still punch through.';}
+  if(o.fog)s+=' Dew point is close \u2014 fog risk near dawn.';
+  if(o.ageMin!=null)s+=' ('+o.id+', '+(o.ageMin<90?o.ageMin+' min old':'last reported '+Math.round(o.ageMin/60)+'h ago')+')';
+  return s;}
 function badges(e){
   let out='';
   if(e.cat==='rocket'&&e.prob!=null)out+=`<span class="wx">\u25D4 ${e.prob}% go</span>`;
@@ -642,7 +659,7 @@ document.getElementById('layers').onclick=async ev=>{
     wxBusy=true;b.querySelector('.dot').style.background='#d48a12';
     try{WX=await loadWx();wxErr=null;}
     catch(err){wxErr=/Failed to fetch|NetworkError|CORS/i.test(err.message)
-      ?'Aviation Weather Center refused the browser request — no CORS header.':err.message;}
+      ?'National Weather Service unreachable from the browser.':err.message;}
     wxBusy=false;syncChip(b);}
   wxNote=wxOn&&wxErr?('sky layer off — '+wxErr):'';
   sel=null;clear();render();};
