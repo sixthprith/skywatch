@@ -10,7 +10,7 @@ No backend, no build step, no API key. Drop it on GitHub Pages and it works.
 
 | File | Job |
 |---|---|
-| `index.html` | The whole app. Fetches live launches, reads `events.json`, computes bearing and drive time from Gainesville or Orlando. |
+| `index.html` | The whole app — a Leaflet map styled as a VFR sectional. Fetches live launches, reads `events.json`, computes bearing, range and drive time from Gainesville or Orlando. |
 | `events.json` | Airshows and military events. Hand-maintained — there is no API for these. |
 | `scripts/build_ics.py` | Builds `feed.ics` from live launches + `events.json`. Standard library only. |
 | `.github/workflows/feed.yml` | Runs that script every 6 hours and commits the result. |
@@ -63,11 +63,21 @@ Append to `events.json`:
 
 ## Where the data comes from
 
-**Launches** — [The Space Devs Launch Library 2](https://thespacedevs.com/llapi), free and unauthenticated. Anonymous access is capped at roughly 15 requests per hour per IP; the page makes exactly one per load, so this only bites if you're hammering refresh. The site filters to Florida pads by matching the pad's location name.
+**Launches** — [The Space Devs Launch Library 2](https://thespacedevs.com/llapi), free and unauthenticated. The interface also uses the API's `probability` field (the official percentage chance of going that day), `window_start`/`window_end` for the real launch window, plus orbit, status and the webcast link. Anonymous access is capped at roughly 15 requests per hour per IP; the page makes exactly one per load, so this only bites if you're hammering refresh. The site filters to Florida pads by matching the pad's location name.
 
 **Airshows** — no API exists. The Blue Angels publish a PDF; the Thunderbirds publish a separate page; the two sometimes disagree. Everything currently in `events.json` was pulled from the official schedules and the trade press, with 2027 dates marked preliminary because the confirmed version isn't announced until ICAS in December 2026.
 
 **Military tests and flyovers** — no public feed at all, by design. Worth watching manually: Patrick SFB and Eglin release advisories, and the FAA's temporary flight restriction list often telegraphs something interesting before an announcement does.
+
+## The interface
+
+A Leaflet map with OpenStreetMap tiles pushed through a CSS filter — sepia, desaturated, hue-rotated — so they read as chart paper, with a multiply-blended grain layer on top. Concentric range rings every 25 nm, radial bearing lines every 30°, and a compass rose.
+
+Events are iOS 6-style numbered pins. Pads that sit on top of one another fan upward in alternating steps with a dashed leader line back to the true position, so no number is ever hidden behind another.
+
+The side panel is a filter bank: category lamps that light rather than fill, a date-range selector, and a machined radius knob you can drag, scroll or arrow-key from 25 to 250 nm. Clicking a list row or a pin links the two and draws a bearing line home.
+
+**Category lamps are built from the data.** A lamp exists only for a category that currently has events. `events.json` accepts `airshow`, `military`, `flyin` and `museum` — add a fly-in or a museum and its lamp appears on the next load. Nothing sits dead.
 
 ## The sky conditions layer
 
@@ -81,12 +91,13 @@ The fallback, if it does: add a step to `.github/workflows/feed.yml` that curls 
 
 ## Two things the site guesses
 
-**Drive time** is distance ÷ 55 mph plus 15 minutes. It ignores I-4, which is a meaningful omission for anything south of Orlando.
+Distances and bearings are nautical miles and degrees true, matching the sectional the interface is modelled on.
 
-**"Visible from home"** flags a launch when it's within 220 miles and lifting off between 8 PM and 6 AM Eastern. That's the window where a rocket reads as a slow bright star climbing out of the east. Daytime launches from the same distance are invisible. It's a heuristic — high-energy trajectories and clear nights beat it, overcast defeats it.
+**Drive time** is distance ÷ 55 mph plus 15 minutes, converted from nautical miles. It ignores I-4, which is a meaningful omission for anything south of Orlando.
+
+**"Visible from home"** flags a launch when it's within 190 nm and lifting off between 8 PM and 6 AM Eastern. That's the window where a rocket reads as a slow bright star climbing out of the east. Daytime launches from the same distance are invisible. It's a heuristic — high-energy trajectories and clear nights beat it, overcast defeats it.
 
 ## Ideas worth building next
 
-- Cloud cover at the pad and at your location, from the National Weather Service API (free, no key). The single biggest predictor of a wasted drive.
 - A viewing-spot layer — Playalinda, Jetty Park, the Max Brewer Bridge — with which pads each one has line of sight to.
 - Pull the launch azimuth so the compass points where the rocket will actually *go*, not just where the pad sits.
